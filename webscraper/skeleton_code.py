@@ -55,7 +55,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print ("please provide a configuration file")
         print("Usage:  %s path2configfile" % sys.argv[0])
-        sys,exit(1)
+        sys.exit(1)
 
-    myobj = Webscraper(sys.argv[1])
+    configfile= sys.argv[1]
+    myobj = Webscraper( configfile )
     myobj.main()
