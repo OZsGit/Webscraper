@@ -71,7 +71,9 @@ while z < len(urls):
         Pcontent = Psoup.find_all('p')
         print("Written new file: " + Ptitle)
 
-        path = '/Users/OZ/PycharmProjects/Webscraper/Articles/' + urlhtml[7:] #Set write directory
+        #path = '/Users/OZ/PycharmProjects/Webscraper/Articles/' + urlhtml[7:] #Set write directory
+        dest_dir='/home/fzhang/webscrape/'
+        path = dest_dir + urlhtml[7:] #Set write directory
         if not os.path.exists(path):
             os.makedirs(path)
 
