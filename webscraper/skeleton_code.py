@@ -3,8 +3,10 @@
 """
 Objected-Oriented Programming using class
 Modular codes using small functions, each of which can be unit-tested
+Best practices,
+docs
 
-The functions should be designed to be a coherent logical unit. not too complex, for readability and maitence,
+The functions should be designed to be a coherent logical unit. not too complex, for readability and maint
 """
 
 import urllib.request as ur
@@ -50,8 +52,8 @@ class Webscraper:
 #######################################
 # script execution entry  point
 ######################################
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     if len(sys.argv) < 2:
         print ("please provide a configuration file")
         print("Usage:  %s path2configfile" % sys.argv[0])
