@@ -49,7 +49,7 @@ class Webscraper:
 
     def check_keys(self, check_page):
         for akey in self.keywords:
-            if akey in check_page: #checks if any of the keywords appear in the list of links
+            if akey.lower() in check_page.lower(): #checks if any of the keywords appear in the list of links
                 self.check1 = 1
 
     def check_repeat(self, check_page):
