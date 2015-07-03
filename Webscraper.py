@@ -1,85 +1,115 @@
 import urllib.request as ur
 from bs4 import BeautifulSoup
-import os
+import os, sys
+import configparser as conf
+import ast
 
-urls = ["http://www.afr.com","http://www.abc.net.au/news"] #urls for the websites to be searched (main pages)
-Tkeys = ["greece","telstra","greek","mafia"] #keywords; it looks for these in the links. This won't work if the links don't have the article titles in them
+#configfile = input("Please enter the name of your configuration file: ") + ".cfg"
 
-url0 = []
-url1 = []
-url2 = []
-url3 = []
-url4 = []
-pages = [url0, url1, url2, url3, url4] #If more than five websites are to be searched, add more empty arrays
+class Webscraper:
+    def __init__(self, configfile):
+        self.pages = []
+        config = conf.ConfigParser()
+        config.read(configfile)
+        self.urls = self.get_urls(configfile)
+        self.keywords = self.get_keywords(configfile)
+        self.path = self.get_path(configfile)
 
-i = 0 #website number
+    def get_urls(self, configfile):
+        config = conf.ConfigParser()
+        config.read(configfile)
+        return config.get('Websites', 'web').split(',')
 
-while i<len(urls): #checks each website in urls
-    htmltext = ur.urlopen(urls[i]).read()
-    soup = BeautifulSoup(htmltext, 'html.parser')
-    text = soup.get_text()
-    tree = soup.prettify()
-    #print(tree)
-    #print(text)
+    def get_keywords(self, configfile):
+        config = conf.ConfigParser()
+        config.read(configfile)
+        return config.get('Keywords', 'keywords').split(',')
+
+    def get_path(self, configfile):
+        config = conf.ConfigParser()
+        config.read(configfile)
+        return config.get('Path', 'path')
+
+    def do_scrape(self, aurl):
+        htmltext = ur.urlopen(aurl).read()
+        soup = BeautifulSoup(htmltext, 'html.parser')
+        for link in soup.find_all('a'):
+            check_page = link.get('href') #this is a list of every link on the webpage, it looks for the <a href=> tag
+
+            self.check1 = 0 #does it pass the keyword test? 0 is no, 1 is yes
+            self.check2 = 0 #does it pass the repeat test?
+            self.check3 = 0 #does it pass the http test?
+            self.check_keys(check_page)
+            self.check_repeat(check_page)
+            self.check_Xurl(check_page)
+            if self.check1==1 and self.check2==1 and self.check3==1:
+                self.pages.insert(0, link.get('href')) #if a link passes all previous checks, it is written into an array
+        print(self.pages)
+
+    def check_keys(self, check_page):
+        for akey in self.keywords:
+            if akey in check_page: #checks if any of the keywords appear in the list of links
+                self.check1 = 1
+
+    def check_repeat(self, check_page):
+        if len(self.pages) > 0:
+            repeat_check_counter = 0 #index of repeat check
+            while repeat_check_counter < len(self.pages):
+                if self.pages[repeat_check_counter] in check_page: #sometimes there are duplicate links, this checks if there is already registered an identical link
+                    repeat_check_counter = len(self.pages)
+                    self.check2 = 0
+                else:
+                    self.check2 = 1
+                repeat_check_counter+=1
+        else:
+            self.check2 = 1
+
+    def check_Xurl(self, check_page):
+        if 'http://' in check_page: #if the link begins with 'http://' it links away from the website so isn't necessary
+            self.check3 = 0
+        else:
+            self.check3 = 1
+
+    def write_tofile(self, aurl):
+        for wpage in self.pages:
+            html = aurl + wpage
+            texthtml = ur.urlopen(html).read()
+            self.Psoup = BeautifulSoup(texthtml, 'html.parser')
+            self.Ptitle = self.Psoup.title.string
+            Pcontent = self.prettify()
+            print("Written new file: " + self.Ptitle)
+
+            path = os.path.join(self.path + aurl[7:]) #Set write directory
+            if not os.path.exists(path):
+                os.makedirs(path)
+
+            filename = self.Ptitle + '.html'
+            with open(os.path.join(path, filename), 'w') as write_file:
+                write_file.write(Pcontent)
+
+    def prettify(self):
+        text = '<head><meta charset="UTF-8"></head> <body style = "margin:10%"><body> <h1>{:s}</h1>'.format(self.Ptitle)
+        for para in self.Psoup.find_all('p'):
+            text_para = str(para)
+            #print(text_para)
+            text+=text_para
+        return text
+
+    def main(self):
+        for aurl in self.urls:
+            self.pages = []
+            self.do_scrape(aurl)
+            self.write_tofile(aurl)
 
 
-    for link in soup.find_all('a'):
-        check = link.get('href') #this is a list of every link on the webpage, it looks for the <a href=> tag
+if __name__ == "__main__":
 
-        tchecks = 0 #number of the keyword being checked
-        inT = 0 #does it pass the keyword test? 0 is no, 1 is yes
-        inR = 0 #does it pass the repeat test?
-        while tchecks < len(Tkeys):
-            if Tkeys[tchecks] in check: #checks if any of the keywords appear in the list of links
-                inT = 1
-            tchecks+=1
-        #print(lnum)
-        if inT == 1:
-            if len(pages[i]) > 0:
-                rcheck = 0 #index of repeat check
-                while rcheck < len(pages[i]):
-                    if pages[i][rcheck] in check: #sometimes there are duplicate links, this checks if there is already registered an identical link
-                        rcheck = len(pages[i])
-                        inR = 0
-                    else:
-                        if 'http://' in check: #if the link begins with 'http://' it links away from the website so isn't necessary
-                            inR = 0
-                        else:
-                            inR = 1
-                    rcheck+=1
-            else:
-                inR = 1
-        if inR == 1:
-            pages[i].insert(0, link.get('href')) #if a link passes all previous checks, it is written into an array
+    if len(sys.argv) < 2:
+        print ("please provide a configuration file")
+        print("Usage:  %s path2configfile" % sys.argv[0])
+        sys.exit(1)
 
-    print(pages[i])
-    print(len(pages[i]),end='')
-    print(" matched objects")
-    i+=1
-
-z = 0 #index of website writing
-
-while z < len(urls):
-    urlhtml = urls[z]
-    x = 0 #index of webpage writing
-    while x < len(pages[z]):
-        pagehtml = pages[z][x]
-        html = urlhtml + pagehtml
-        texthtml = ur.urlopen(html).read()
-        Psoup = BeautifulSoup(texthtml, 'html.parser')
-        Ptitle = Psoup.title.string
-        Pcontent = Psoup.find_all('p')
-        print("Written new file: " + Ptitle)
-
-        #path = '/Users/OZ/PycharmProjects/Webscraper/Articles/' + urlhtml[7:] #Set write directory
-        dest_dir='/home/fzhang/webscrape/'
-        path = dest_dir + urlhtml[7:] #Set write directory
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-        filename = Ptitle + '.html'
-        with open(os.path.join(path, filename), 'w') as write_file:
-            write_file.write(str(Pcontent))
-
-        x+=1
-    z+=1
+    configfile= sys.argv[1]
+    #configfile = "Configuration.cfg"
+    myobj = Webscraper(configfile)
+    myobj.main()
