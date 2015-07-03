@@ -74,18 +74,26 @@ class Webscraper:
         for wpage in self.pages:
             html = aurl + wpage
             texthtml = ur.urlopen(html).read()
-            Psoup = BeautifulSoup(texthtml, 'html.parser')
-            Ptitle = Psoup.title.string
-            Pcontent = Psoup.find_all('p')
-            print("Written new file: " + Ptitle)
+            self.Psoup = BeautifulSoup(texthtml, 'html.parser')
+            self.Ptitle = self.Psoup.title.string
+            Pcontent = self.prettify()
+            print("Written new file: " + self.Ptitle)
 
             path = os.path.join(self.path + aurl[7:]) #Set write directory
             if not os.path.exists(path):
                 os.makedirs(path)
 
-            filename = Ptitle + '.html'
+            filename = self.Ptitle + '.html'
             with open(os.path.join(path, filename), 'w') as write_file:
-                write_file.write(str(Pcontent))
+                write_file.write(Pcontent)
+
+    def prettify(self):
+        text = '<head><meta charset="UTF-8"></head> <body style = "margin:10%"><body> <h1>{:s}</h1>'.format(self.Ptitle)
+        for para in self.Psoup.find_all('p'):
+            text_para = str(para)
+            #print(text_para)
+            text+=text_para
+        return text
 
     def main(self):
         for aurl in self.urls:
