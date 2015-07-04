@@ -56,7 +56,7 @@ class Webscraper:
         if len(self.pages) > 0:
             repeat_check_counter = 0 #index of repeat check
             while repeat_check_counter < len(self.pages):
-                if self.pages[repeat_check_counter] in check_page: #sometimes there are duplicate links, this checks if there is already registered an identical link
+                if self.pages[repeat_check_counter][-12:] in check_page: #sometimes there are duplicate links, this checks if there is already registered an identical link
                     repeat_check_counter = len(self.pages)
                     self.check2 = 0
                 else:
