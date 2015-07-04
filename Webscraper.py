@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import os, sys
 import configparser as conf
 import ast
+import re
 
 class Webscraper:
     def __init__(self, configfile):
@@ -85,7 +86,7 @@ class Webscraper:
             filename = self.Ptitle + '.html'
             self.filepath = os.path.join(path, filename)
             with open(self.filepath, 'w') as write_file:
-                write_file.write(self.Pcontent)
+                write_file.write(self.highlight(self.Pcontent))
 
             self.Iwrite_pagetitle()
             self.Iwrite_blurb()
@@ -111,11 +112,11 @@ class Webscraper:
         self.index+="\n <h1>{:s}</h1>".format(aurl)
 
     def Iwrite_pagetitle(self):
-        self.index+='\n <h3><a href = "{:s}">{:s}</a></h3>'.format(self.filepath, self.Ptitle)
+        self.index+='\n <h3><a href = "{:s}">{:s}</a></h3>'.format(self.filepath, self.highlight(self.Ptitle))
 
     def Iwrite_blurb(self):
         blurb = self.blurbify()
-        self.index+="\n <p>{:s}...</p>".format(blurb)
+        self.index+="\n <p>{:s}...</p>".format(self.highlight(blurb))
 
     def Index_write(self):
         Ipath = self.path
@@ -123,13 +124,29 @@ class Webscraper:
         with open(os.path.join(Ipath, filename), 'w') as write_file:
             write_file.write(self.index)
 
+    def highlight(self, text):
+        newtxt = text
+        mark_tags = ['<mark>', '</mark>']
+        for key in self.keywords:
+            starts = [m.start() for m in re.finditer(re.compile(key, re.IGNORECASE), newtxt)]
+            Mcounter = 0
+            while Mcounter < len(starts):
+                add = Mcounter * (len(mark_tags[0]) + len(mark_tags[1]))
+                newtxt = newtxt[:starts[Mcounter] + add] + mark_tags[0] + newtxt[starts[Mcounter] + add:]
+                newtxt = newtxt[:starts[Mcounter] + len(key) + 6 + add] + mark_tags[1] + newtxt[starts[Mcounter] + len(key) + 6 + add:]
+                Mcounter+=1
+        return newtxt
+
     def main(self):
         for aurl in self.urls:
             self.blurbs = []
             self.pages = []
-            self.do_scrape(aurl)
-            self.Iwrite_Urltitle(aurl)
-            self.write_tofile(aurl)
+            try:
+                self.do_scrape(aurl)
+                self.Iwrite_Urltitle(aurl)
+                self.write_tofile(aurl)
+            except:
+                print("Oops. Dead link or something...")
         self.Index_write()
 
 
