@@ -4,8 +4,6 @@ import os, sys
 import configparser as conf
 import ast
 
-#configfile = input("Please enter the name of your configuration file: ") + ".cfg"
-
 class Webscraper:
     def __init__(self, configfile):
         config = conf.ConfigParser()
@@ -100,6 +98,15 @@ class Webscraper:
             text+=text_para + '\n'
         return text
 
+    def blurbify(self):
+        blurb_text = ''
+        for para in self.Psoup.find_all('p'):
+            text_para = str(para)
+            #print(text_para)
+            blurb_text+=text_para + '\n'
+        Bsoup = BeautifulSoup(blurb_text, 'html.parser')
+        return Bsoup.text[0:500]
+
     def Iwrite_Urltitle(self, aurl):
         self.index+="\n <h1>{:s}</h1>".format(aurl)
 
@@ -107,8 +114,7 @@ class Webscraper:
         self.index+='\n <h3><a href = "{:s}">{:s}</a></h3>'.format(self.filepath, self.Ptitle)
 
     def Iwrite_blurb(self):
-        Bsoup = BeautifulSoup(self.Pcontent, 'html.parser')
-        blurb = Bsoup.text[0:500]
+        blurb = self.blurbify()
         self.index+="\n <p>{:s}...</p>".format(blurb)
 
     def Index_write(self):
