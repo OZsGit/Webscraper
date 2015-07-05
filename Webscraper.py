@@ -83,7 +83,7 @@ class Webscraper:
             if not os.path.exists(path):
                 os.makedirs(path)
 
-            filename = self.html_friendly(self.Ptitle + '.html')
+            filename = self.html_friendly(self.Ptitle) + '.html'
             self.filepath = os.path.join(path, filename)
             with open(self.filepath, 'w') as write_file:
                 write_file.write(self.highlight(self.Pcontent))
@@ -110,7 +110,15 @@ class Webscraper:
 
     def html_friendly(self, text):
         new_text = re.sub('[^a-zA-Z0-9 \n\.]', '', text)
-        return new_text.replace(' ', '-').lower()
+        new_text = new_text.replace(' ', '-').lower()
+        words = new_text.split('-')
+        word_count = 0
+        line = ''
+        while word_count < 7:
+            line = line + words[word_count] + '-'
+            word_count+=1
+        line = line[0:len(line)-1]
+        return line
 
     def Iwrite_Urltitle(self, aurl):
         self.index+="\n <h1>{:s}</h1>".format(aurl)
