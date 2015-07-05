@@ -1,7 +1,7 @@
-import urllib.request as ur
+import urllib2 as ur
 from bs4 import BeautifulSoup
 import os, sys
-import configparser as conf
+import ConfigParser as conf
 import ast
 import re
 
