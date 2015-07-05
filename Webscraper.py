@@ -109,7 +109,7 @@ class Webscraper:
         return Bsoup.text[0:500]
 
     def html_friendly(self, text):
-        new_text = re.sub('\W', ' ', text)
+        new_text = re.sub('[^a-zA-Z0-9 \n\.]', '', text)
         return new_text.replace(' ', '-').lower()
 
     def Iwrite_Urltitle(self, aurl):
