@@ -83,7 +83,7 @@ class Webscraper:
             if not os.path.exists(path):
                 os.makedirs(path)
 
-            filename = self.Ptitle + '.html'
+            filename = self.html_friendly(self.Ptitle + '.html')
             self.filepath = os.path.join(path, filename)
             with open(self.filepath, 'w') as write_file:
                 write_file.write(self.highlight(self.Pcontent))
@@ -108,6 +108,9 @@ class Webscraper:
         Bsoup = BeautifulSoup(blurb_text, 'html.parser')
         return Bsoup.text[0:500]
 
+    def html_friendly(self, text):
+        return text.replace(' ', '%').lower()
+
     def Iwrite_Urltitle(self, aurl):
         self.index+="\n <h1>{:s}</h1>".format(aurl)
 
@@ -116,11 +119,11 @@ class Webscraper:
 
     def Iwrite_blurb(self):
         blurb = self.blurbify()
-        self.index+="\n <p>{:s}...</p>".format(self.highlight(blurb))
+        self.index+='\n <p>{:s}...</p>'.format(self.highlight(blurb).encode('utf8'))
 
     def Index_write(self):
         Ipath = self.path
-        filename = 'Index.html'
+        filename = 'index.html'
         with open(os.path.join(Ipath, filename), 'w') as write_file:
             write_file.write(self.index)
 
@@ -145,8 +148,9 @@ class Webscraper:
                 self.do_scrape(aurl)
                 self.Iwrite_Urltitle(aurl)
                 self.write_tofile(aurl)
-            except:
+            except Exception as ex:
                 print("Oops. Dead link or something...")
+                print(ex)
         self.Index_write()
 
 
