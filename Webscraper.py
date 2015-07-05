@@ -54,13 +54,14 @@ class Webscraper:
                     self.check_isword(start, akey, check_page)
 
     def check_isword(self, start, akey, check_page):
+        punc_chars = ["<", ">", " ", "'", ":", "-", "/", ","]
         begin = None
         end = None
         first = check_page[start - 1]
-        if first == "-" or first == "/":
+        if first in punc_chars:
             begin = True
         last = check_page[start + len(akey)]
-        if last == "-" or last == "/":
+        if last in punc_chars:
             end = True
         if begin and end:
             self.check1 = 1
@@ -155,11 +156,24 @@ class Webscraper:
         mark_tags = ['<mark>', '</mark>']
         for key in self.keywords:
             starts = [m.start() for m in re.finditer(re.compile(key, re.IGNORECASE), newtxt)]
+            adjust_starts = []
+            for start in starts:
+                punc_chars = [newtxt[-1], "<", ">", " ", "'", ":", "-", "/", ","]
+                begin = None
+                end = None
+                first = newtxt[start - 1]
+                if first in punc_chars:
+                    begin = True
+                last = newtxt[start + len(key)]
+                if last in punc_chars:
+                    end = True
+                if begin and end:
+                    adjust_starts.append(start)
             Mcounter = 0
-            while Mcounter < len(starts):
+            while Mcounter < len(adjust_starts):
                 add = Mcounter * (len(mark_tags[0]) + len(mark_tags[1]))
-                newtxt = newtxt[:starts[Mcounter] + add] + mark_tags[0] + newtxt[starts[Mcounter] + add:]
-                newtxt = newtxt[:starts[Mcounter] + len(key) + 6 + add] + mark_tags[1] + newtxt[starts[Mcounter] + len(key) + 6 + add:]
+                newtxt = newtxt[:adjust_starts[Mcounter] + add] + mark_tags[0] + newtxt[adjust_starts[Mcounter] + add:]
+                newtxt = newtxt[:adjust_starts[Mcounter] + len(key) + 6 + add] + mark_tags[1] + newtxt[adjust_starts[Mcounter] + len(key) + 6 + add:]
                 Mcounter+=1
         return newtxt
 
