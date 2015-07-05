@@ -49,7 +49,21 @@ class Webscraper:
     def check_keys(self, check_page):
         for akey in self.keywords:
             if akey.lower() in check_page.lower(): #checks if any of the keywords appear in the list of links
-                self.check1 = 1
+                starts = [m.start() for m in re.finditer(akey.lower(), check_page.lower())]
+                for start in starts:
+                    self.check_isword(start, akey, check_page)
+
+    def check_isword(self, start, akey, check_page):
+        begin = None
+        end = None
+        first = check_page[start - 1]
+        if first == "-" or first == "/":
+            begin = True
+        last = check_page[start + len(akey)]
+        if last == "-" or last == "/":
+            end = True
+        if begin and end:
+            self.check1 = 1
 
     def check_repeat(self, check_page):
         if len(self.pages) > 0:
@@ -166,7 +180,7 @@ class Webscraper:
 if __name__ == "__main__":
 
     if len(sys.argv) < 2:
-        print ("please provide a configuration file")
+        print ("Please provide a configuration file")
         print("Usage:  %s path2configfile" % sys.argv[0])
         sys.exit(1)
 
