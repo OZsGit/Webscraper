@@ -9,7 +9,8 @@ class Webscraper:
     def __init__(self, configfile):
         config = conf.ConfigParser()
         config.read(configfile)
-        self.index = '<html> \n<head>\n<meta charset="UTF-8">\n</head> \n<body style = "margin:10%">'
+        self.Indextitle = "Index"
+        self.index = '<html> \n<head>\n<meta charset="UTF-8">\n<title>{:s}</title>\n</head> \n<body style = "margin:10%">'.format(self.Indextitle)
         self.urls = self.get_urls(configfile)
         self.keywords = self.get_keywords(configfile)
         self.path = self.get_path(configfile)
@@ -107,7 +108,7 @@ class Webscraper:
             self.Iwrite_blurb()
 
     def prettify(self):
-        text = '<html> \n<head>\n<meta charset="UTF-8">\n</head> \n<body style = "margin:10%">\n<h1>{:s}</h1>'.format(self.Ptitle)
+        text = '<html> \n<head>\n<meta charset="UTF-8">\n<title>{:s}</title>\n</head> \n<body style = "margin:10%">\n<h1>{:s}</h1>'.format(self.Ptitle, self.Ptitle)
         for para in self.Psoup.find_all('p'):
             text_para = str(para)
             #print(text_para)
