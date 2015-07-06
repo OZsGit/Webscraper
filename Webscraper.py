@@ -158,14 +158,14 @@ class Webscraper:
             starts = [m.start() for m in re.finditer(re.compile(key, re.IGNORECASE), newtxt)]
             adjust_starts = []
             for start in starts:
-                punc_chars = [newtxt[-1], "<", ">", " ", "'", ":", "-", "/", ","]
+                punc_chars = ["<", ">", " ", "'", ":", "-", "/", ","]
                 begin = None
                 end = None
                 first = newtxt[start - 1]
-                if first in punc_chars:
+                if [first in punc_chars] or [start == 0]:
                     begin = True
                 last = newtxt[start + len(key)]
-                if last in punc_chars:
+                if [last in punc_chars] or [start + len(key) == len(newtxt)]:
                     end = True
                 if begin and end:
                     adjust_starts.append(start)
