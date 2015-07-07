@@ -108,7 +108,7 @@ class Webscraper:
             self.Iwrite_blurb()
 
     def prettify(self):
-        text = '<!DOCTYPE html>\n<html lang = "en"> \n<head>\n<meta charset="UTF-8">\n<title>{:s}</title>\n</head> \n<body style = "margin:10%">\n<h1>{:s}</h1>'.format(self.Ptitle, self.Ptitle)
+        text = '<!DOCTYPE html>\n<html lang = "en">\n<head>\n<meta charset="UTF-8">\n<title> {:s} </title>\n</head> \n<body style = "margin:10%">\n<h1> {:s} </h1>'.format(self.Ptitle.encode('utf8'), self.Ptitle.encode('utf8'))
         for para in self.Psoup.find_all('p'):
             text_para = str(para)
             #print(text_para)
@@ -144,7 +144,7 @@ class Webscraper:
         self.index+="\n <h1>{:s}</h1>".format(aurl)
 
     def Iwrite_pagetitle(self):
-        self.index+='\n <h3><a href = "{:s}">{:s}</a></h3>'.format(self.filepath, self.highlight(self.Ptitle))
+        self.index+='\n <h3><a href = "{:s}">{:s}</a></h3>'.format(self.filepath, self.highlight(self.Ptitle).encode('utf8'))
 
     def Iwrite_blurb(self):
         blurb = self.blurbify()
