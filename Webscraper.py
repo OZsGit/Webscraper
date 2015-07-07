@@ -132,8 +132,11 @@ class Webscraper:
         word_count = 0
         line = ''
         while word_count < 7:
-            line = line + words[word_count] + '-'
-            word_count+=1
+            try:
+                line = line + words[word_count] + '-'
+                word_count+=1
+            except:
+                word_count = 7
         line = line[0:len(line)-1]
         return line
 
