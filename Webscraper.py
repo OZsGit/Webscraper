@@ -168,10 +168,14 @@ class Webscraper:
                 begin = None
                 end = None
                 first = newtxt[start - 1]
-                if [first in punc_chars] or [start == 0]:
+                Sinpunc = first in punc_chars
+                isstart = start == 0
+                if Sinpunc or isstart:
                     begin = True
                 last = newtxt[start + len(key)]
-                if [last in punc_chars] or [start + len(key) == len(newtxt)]:
+                Einpunc = last in punc_chars
+                isend = start + len(key) == len(newtxt)
+                if Einpunc or isend:
                     end = True
                 if begin and end:
                     adjust_starts.append(start)
