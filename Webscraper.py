@@ -20,6 +20,20 @@ class Webscraper:
         config.read(configfile)
         return config.get('Websites', 'web').split(',')
 
+    def get_refurl(self, aurl):
+        newurl = ""
+        Lcount = 0
+        dashcount = 0
+        while Lcount < len(aurl):
+            letter = aurl[Lcount]
+            if letter == '/':
+                dashcount+=1
+            newurl+=letter
+            if dashcount == 3:
+                Lcount = len(aurl)
+            Lcount+=1
+        return newurl
+
     def get_keywords(self, configfile):
         config = conf.ConfigParser()
         config.read(configfile)
@@ -87,15 +101,16 @@ class Webscraper:
             self.check3 = 1
 
     def write_tofile(self, aurl):
+        baseurl = self.get_refurl(aurl)
         for wpage in self.pages:
-            html = aurl + wpage
+            html = baseurl + wpage
             texthtml = ur.urlopen(html).read()
             self.Psoup = BeautifulSoup(texthtml, 'html.parser')
             self.Ptitle = self.Psoup.title.string
             self.Pcontent = self.prettify()
             print("Written new file: " + self.Ptitle)
 
-            path = os.path.join(self.path + aurl[7:]) #Set write directory
+            path = os.path.join(self.path + baseurl[7:]) #Set write directory
             if not os.path.exists(path):
                 os.makedirs(path)
 
