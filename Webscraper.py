@@ -18,7 +18,7 @@ class Webscraper:
     def get_urls(self, configfile):
         config = conf.ConfigParser()
         config.read(configfile)
-        return config.get('Websites', 'web').split(',')
+        return config.get('Websites', 'web2').split(',')
 
     def get_refurl(self, aurl):
         newurl = ""
@@ -37,7 +37,7 @@ class Webscraper:
     def get_keywords(self, configfile):
         config = conf.ConfigParser()
         config.read(configfile)
-        return config.get('Keywords', 'keywords').split(',')
+        return config.get('Keywords', 'keywords2').split(',')
 
     def get_path(self, configfile):
         config = conf.ConfigParser()
@@ -115,12 +115,24 @@ class Webscraper:
                 os.makedirs(path)
 
             filename = self.html_friendly(self.Ptitle) + '.html'
+            filename = self.filetitle(wpage)
             self.filepath = os.path.join(path, filename)
             with open(self.filepath, 'w') as write_file:
                 write_file.write(self.highlight(self.Pcontent))
 
             self.Iwrite_pagetitle()
             self.Iwrite_blurb()
+
+    def filetitle(self, wpage):
+        newtitle = ""
+        Ccount = len(wpage)-1
+        while Ccount > 0:
+            if wpage[Ccount] == "/":
+                Ccount = 0
+            else:
+                newtitle = wpage[Ccount] + newtitle
+            Ccount-=1
+        return newtitle
 
     def prettify(self):
         text = '<!DOCTYPE html>\n<html lang = "en">\n<head>\n<meta charset="UTF-8">\n<title> {:s} </title>\n</head> \n<body style = "margin:10%">\n<h1> {:s} </h1>'.format(self.Ptitle.encode('utf8'), self.Ptitle.encode('utf8'))
