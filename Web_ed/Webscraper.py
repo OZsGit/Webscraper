@@ -18,12 +18,26 @@ class Webscraper:
     def get_urls(self, configfile):
         config = conf.ConfigParser()
         config.read(configfile)
-        return config.get('Websites', 'web').split(',')
+        return config.get('Websites', 'web2').split(',')
+
+    def get_refurl(self, aurl):
+        newurl = ""
+        Lcount = 0
+        dashcount = 0
+        while Lcount < len(aurl):
+            letter = aurl[Lcount]
+            if letter == '/':
+                dashcount+=1
+            newurl+=letter
+            if dashcount == 3:
+                Lcount = len(aurl)
+            Lcount+=1
+        return newurl
 
     def get_keywords(self, configfile):
         config = conf.ConfigParser()
         config.read(configfile)
-        return config.get('Keywords', 'keywords').split(',')
+        return config.get('Keywords', 'keywords2').split(',')
 
     def get_path(self, configfile):
         config = conf.ConfigParser()
@@ -87,25 +101,38 @@ class Webscraper:
             self.check3 = 1
 
     def write_tofile(self, aurl):
+        baseurl = self.get_refurl(aurl)
         for wpage in self.pages:
-            html = aurl + wpage
+            html = baseurl + wpage
             texthtml = ur.urlopen(html).read()
             self.Psoup = BeautifulSoup(texthtml, 'html.parser')
             self.Ptitle = self.Psoup.title.string
             self.Pcontent = self.prettify()
             print("Written new file: " + self.Ptitle)
 
-            path = os.path.join(self.path + aurl[7:]) #Set write directory
+            path = os.path.join(self.path + baseurl[7:]) #Set write directory
             if not os.path.exists(path):
                 os.makedirs(path)
 
             filename = self.html_friendly(self.Ptitle) + '.html'
+            filename = self.filetitle(wpage)
             self.filepath = os.path.join(path, filename)
             with open(self.filepath, 'w') as write_file:
                 write_file.write(self.highlight(self.Pcontent))
 
             self.Iwrite_pagetitle()
             self.Iwrite_blurb()
+
+    def filetitle(self, wpage):
+        newtitle = ""
+        Ccount = len(wpage)-1
+        while Ccount > 0:
+            if wpage[Ccount] == "/":
+                Ccount = 0
+            else:
+                newtitle = wpage[Ccount] + newtitle
+            Ccount-=1
+        return newtitle
 
     def prettify(self):
         text = '<!DOCTYPE html>\n<html lang = "en">\n<head>\n<meta charset="UTF-8">\n<title> {:s} </title>\n</head> \n<body style = "margin:10%">\n<h1> {:s} </h1>'.format(self.Ptitle.encode('utf8'), self.Ptitle.encode('utf8'))
@@ -144,7 +171,7 @@ class Webscraper:
         self.index+="\n <h1>{:s}</h1>".format(aurl)
 
     def Iwrite_pagetitle(self):
-        self.index+='\n <h3><a href = "{:s}">{:s}</a></h3>'.format(self.filepath, self.highlight(self.Ptitle).encode('utf8'))
+        self.index+='\n <h3><a href = "{:s}">{:s}</a></h3>'.format(os.path.join(baseurl, filename), self.highlight(self.Ptitle).encode('utf8'))
 
     def Iwrite_blurb(self):
         blurb = self.blurbify()
